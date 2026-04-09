@@ -1,0 +1,10 @@
+# Compiled binaries
+/sat
+/satellite
+
+# Build artifacts
+dist/
+bin/
+
+# OS/editor
+.DS_Store

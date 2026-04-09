@@ -1,3 +1,3 @@
-module javelin
+module github.com/anthonyanosov/satellite
 
-go 1.26.1
+go 1.22
