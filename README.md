@@ -96,18 +96,6 @@ Example output:
 [{"Name":"process","Complexity":4,"StartLine":10,"EndLine":37}]
 ```
 
-## Migration from Javelin
-
-Backwards compatibility is currently included:
-
-- `:Javelin` and `:JavelinClear` still work as aliases.
-- `require("javelin")` still works as an alias to `require("satellite")`.
-- `cmd/javelin/main.go` remains available for transition.
-
-New installs should use `satellite` names and paths.
-
-`satellite` CLI remains available as a compatibility alias.
-
 ## Troubleshooting
 
 - `Satellite: failed to run analyzer command`
