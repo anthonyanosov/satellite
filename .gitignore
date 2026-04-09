@@ -1,0 +1,9 @@
+# Compiled binaries
+javelin
+
+# Build artifacts
+dist/
+bin/
+
+# OS/editor
+.DS_Store
