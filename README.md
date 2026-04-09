@@ -1,60 +1,56 @@
 # Javelin
 
-Javelin is a small Go + Neovim helper that calculates cyclomatic complexity for
-functions in the currently open Go file and displays each score as virtual text
-at the end of the function declaration line.
+Javelin is a lightweight Neovim plugin + Go CLI for showing Go function
+cyclomatic complexity inline, directly in your editor.
 
-It is currently optimized for simple, on-demand use from Neovim (including
-LazyVim setups).
+It analyzes the current Go buffer and renders `⚡ <complexity>` at end-of-line
+for each function declaration.
 
-## How it works
+## Features
 
-Javelin has two parts:
+- Inline complexity hints using Neovim virtual text
+- On-demand analysis via command or keymap
+- Simple CLI interface for scripting and debugging
+- LazyVim-friendly setup
 
-- A Go CLI (`javelin`) that parses a Go file and emits JSON with function
-  complexity metrics.
-- A Lua module (`lua/init.lua`) that runs the CLI for the current buffer and
-  renders complexity values using Neovim extmarks.
+## How It Works
+
+Javelin has two layers:
+
+- `javelin` CLI (`cmd/main.go`) parses a Go file and returns JSON metrics.
+- Neovim Lua module (`lua/javelin.lua`) runs the CLI and draws extmarks.
 
 Complexity starts at `1` and increases for:
 
-- `if`
-- `for`
-- `range`
-- `case` in `switch`
+- `if`, `for`, and `range`
+- `case` clauses in `switch`
 - logical `&&` and `||`
 
-## Prerequisites
+## Requirements
 
 - Go `1.22+`
-- Neovim `0.9+` (works well in LazyVim)
-- `javelin` binary available on your `PATH`
+- Neovim `0.9+`
+- `javelin` available on your `PATH`
 
-## Install the CLI
+## Installation
 
-From this repository root:
+### 1) Install the CLI
+
+From the project root:
 
 ```bash
 go install ./cmd
 ```
 
-This installs `javelin` into your Go bin directory (usually
-`$HOME/go/bin`). Make sure that directory is on your `PATH`:
-
-```bash
-echo $PATH
-```
-
-If needed:
+Ensure your Go bin directory is on `PATH` (commonly `$HOME/go/bin`):
 
 ```bash
 export PATH="$HOME/go/bin:$PATH"
 ```
 
-## Use with Neovim / LazyVim
+### 2) Add plugin in LazyVim
 
-Add this plugin in your LazyVim spec (example using a local path while
-developing):
+If using a local checkout:
 
 ```lua
 return {
@@ -62,27 +58,33 @@ return {
     dir = "~/path/to/javelin",
     config = function()
       local javelin = require("javelin")
-      vim.keymap.set("n", "<leader>jc", javelin.show_complexity, { desc = "Javelin: show complexity" })
+      vim.keymap.set("n", "<leader>jc", javelin.show_complexity, { desc = "Javelin: Show complexity" })
     end,
   },
 }
 ```
 
-If you publish the repo, switch `dir` to your GitHub plugin spec:
+If installed from GitHub:
 
 ```lua
-{ "anthonyanosov/javelin", config = function() ... end }
+return {
+  {
+    "anthonyanosov/javelin",
+    config = function()
+      local javelin = require("javelin")
+      vim.keymap.set("n", "<leader>jc", javelin.show_complexity, { desc = "Javelin: Show complexity" })
+    end,
+  },
+}
 ```
 
 ## Usage
 
-1. Open a Go file in Neovim.
-2. Run `<leader>jc`.
-3. Javelin prints `⚡ <complexity>` at end-of-line for each function.
+- `:JavelinComplexity` - Analyze current Go buffer and show inline complexity
+- `:JavelinClear` - Clear all Javelin virtual text in current buffer
+- Optional keymap: `<leader>jc` (from config above)
 
-Run the keymap again after edits to refresh annotations.
-
-## CLI usage directly
+## CLI Usage
 
 ```bash
 javelin -src ./path/to/file.go
@@ -97,15 +99,25 @@ Example output:
 ## Troubleshooting
 
 - `Javelin: failed to run analyzer command`
-  - Ensure `javelin` is installed and on your `PATH` inside Neovim.
-- `Javelin: failed to parse JSON output`
-  - Usually means the CLI returned a non-JSON error; run
-    `javelin -src <file.go>` in a terminal to inspect output.
-- No virtual text appears
-  - Confirm the file is valid Go and has function declarations.
+  - `javelin` is not on `PATH` for your Neovim process.
+- `Javelin: failed to parse JSON output: ...`
+  - The CLI returned an error string. Run `javelin -src <file.go>` in terminal.
+- `Javelin: current buffer is not a Go file`
+  - Switch to a `.go` buffer first.
 
-## Current limitations
+## Project Structure
 
-- Only analyzes one file at a time (the current buffer).
-- No automatic refresh on save (manual keymap trigger for now).
-- Complexity is function-level only (not package/project aggregation yet).
+- `cmd/main.go` - CLI entrypoint
+- `pkg/` - Go parser and complexity analysis
+- `lua/javelin.lua` - Neovim integration API
+- `plugin/javelin.lua` - auto-registered Neovim user commands
+
+## Roadmap
+
+- Auto-refresh on `BufWritePost` for Go buffers
+- Configurable highlight group and icon
+- Package-level summary view
+
+## License
+
+MIT - see `LICENSE`.
