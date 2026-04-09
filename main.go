@@ -34,27 +34,7 @@ func main() {
 	var funs []FunctionMetric
 	ast.Inspect(astFile, func(n ast.Node) bool {
 		if fn, ok := n.(*ast.FuncDecl); ok {
-			complexity := 1
-
-			ast.Inspect(fn.Body, func(n ast.Node) bool {
-				// For nested anonymous functions, step over it
-				if _, ok := n.(*ast.FuncDecl); ok {
-					return false
-				}
-				switch t := n.(type) {
-				case *ast.IfStmt:
-					complexity++
-				case *ast.ForStmt:
-					complexity++
-				case *ast.RangeStmt:
-					complexity++
-				case *ast.BinaryExpr:
-					if t.Op == token.LAND || t.Op == token.LOR {
-						complexity++
-					}
-				}
-				return true
-			})
+			complexity := computeComplexity(fn)
 
 			funs = append(funs, FunctionMetric{
 				Name:       fn.Name.Name,
@@ -78,4 +58,31 @@ func parseFile(path string) (*ast.File, error) {
 		return nil, err
 	}
 	return file, nil
+}
+
+func computeComplexity(fn *ast.FuncDecl) int {
+	complexity := 1
+	ast.Inspect(fn.Body, func(n ast.Node) bool {
+		// For nested anonymous functions, step over it
+		if _, ok := n.(*ast.FuncDecl); ok {
+			return false
+		}
+		switch t := n.(type) {
+		case *ast.IfStmt:
+			complexity++
+		case *ast.ForStmt:
+			complexity++
+		case *ast.RangeStmt:
+			complexity++
+		case *ast.CaseClause:
+			complexity++
+		case *ast.BinaryExpr:
+			if t.Op == token.LAND || t.Op == token.LOR {
+				complexity++
+			}
+		}
+		return true
+	})
+
+	return complexity
 }
