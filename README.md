@@ -1,5 +1,7 @@
 # Satellite 🛰️
 
+<img src="/assets/satellite.png" alt="satellite" width="200" />
+
 Satellite is a lightweight Neovim plugin + Go CLI for showing Go function
 cyclomatic complexity inline, directly in your editor.
 
